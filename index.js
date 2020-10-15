@@ -2,6 +2,14 @@ const express = require('express');
 const body_parser = require('body-parser');
 const { Translate } = require('@google-cloud/translate').v2;
 const Knex = require('knex');
+const admin = require('firebase-admin');
+
+admin.initializeApp();
+
+admin.firestore().collection('test').get()
+    .then((querySnapshot) => {
+        console.log(querySnapshot.docs());
+    });
 
 const connect = () => {
     const config = {
@@ -29,6 +37,17 @@ app.listen(port, () => {
 });
 
 app.use(body_parser.json());
+
+app.get('/', (req, res) => {
+    admin.firestore().collection('test').get()
+        .then((querySnapshot) => {
+            res.json(querySnapshot.docs);
+        })
+        .catch(error => {
+            console.error(error);
+            res.json({ error: error.code });
+        });
+});
 
 app.get('/hello', (req, res) => {
     const name = req.query.name;
